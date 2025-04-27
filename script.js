@@ -278,4 +278,25 @@ removeImageBtn.addEventListener('click', () => {
 });
 
 // 初期化時にサイズを設定
-updateSize(currentSize); 
+updateSize(currentSize);
+
+// 選択を防止する
+document.addEventListener('selectstart', function(e) {
+    // 設定メニュー内の入力フィールドは選択可能にする
+    if (!settings.contains(e.target)) {
+        e.preventDefault();
+    }
+});
+
+// ドラッグを防止する
+document.addEventListener('dragstart', function(e) {
+    e.preventDefault();
+});
+
+// 右クリックコンテキストメニューを防止する
+document.addEventListener('contextmenu', function(e) {
+    // 設定メニュー内は右クリックを許可する
+    if (!settings.contains(e.target)) {
+        e.preventDefault();
+    }
+}); 

@@ -5,6 +5,10 @@ body {
     overflow: hidden;
     height: 100vh;
     cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 #settings {
@@ -94,6 +98,10 @@ body {
     overflow: hidden;
     height: auto;
     box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 #dvd-logo h1 {
@@ -101,6 +109,10 @@ body {
     padding: 0;
     display: inline-block;
     width: auto;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 #dvd-logo img {
@@ -108,6 +120,11 @@ body {
     height: 100%;
     object-fit: contain;
     display: block;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    pointer-events: none;
 }
 
 /* フルスクリーン時のDVDロゴのサイズを調整 */
