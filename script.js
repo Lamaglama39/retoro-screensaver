@@ -1,6 +1,11 @@
 const logo = document.getElementById('dvd-logo');
 const speedInput = document.getElementById('speed');
+const sizeInput = document.getElementById('size');
 const textInput = document.getElementById('text');
+const textGroup = document.getElementById('text-group');
+const imageGroup = document.getElementById('image-group');
+const imageUpload = document.getElementById('image-upload');
+const removeImageBtn = document.getElementById('remove-image');
 const settings = document.getElementById('settings');
 const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF'];
 let x = 0;
@@ -9,6 +14,8 @@ let dx = 2;
 let dy = 2;
 let currentColor = 0;
 let isFullscreen = false;
+let isImageMode = false;
+let currentSize = 5; // デフォルトサイズ
 
 function updatePosition() {
     const maxX = window.innerWidth - logo.offsetWidth;
@@ -46,8 +53,10 @@ function updatePosition() {
 }
 
 function changeColor() {
-    currentColor = (currentColor + 1) % colors.length;
-    logo.style.backgroundColor = colors[currentColor];
+    if (!isImageMode) {
+        currentColor = (currentColor + 1) % colors.length;
+        logo.style.backgroundColor = colors[currentColor];
+    }
 }
 
 function adjustPosition() {
@@ -113,16 +122,45 @@ function toggleFullscreen() {
     }, 100);
 }
 
+function updateSize(size) {
+    currentSize = size;
+    
+    if (isImageMode) {
+        // 画像モードの場合はボックスサイズを直接変更
+        const baseSize = 10; // 基準となるビューポートの割合（%）
+        const sizePercentage = baseSize * (size / 5); // 5が基準値（50%）、1は10%、10は100%
+        logo.style.width = `calc(${sizePercentage}vw + 20px)`;
+    } else {
+        // テキストモードの場合はフォントサイズを変更し、ボックスサイズは自動
+        const baseFontSize = 20; // 基準フォントサイズ (px)
+        const fontSize = baseFontSize * (size / 5); // スケーリング
+        logo.style.width = 'auto';
+        logo.style.fontSize = `${fontSize}px`;
+    }
+    
+    // 位置調整
+    adjustPosition();
+}
+
 // 速度設定の更新
 speedInput.addEventListener('input', (e) => {
     const speed = parseInt(e.target.value);
     updateSpeed(speed);
 });
 
+// サイズ設定の更新
+sizeInput.addEventListener('input', (e) => {
+    const size = parseInt(e.target.value);
+    updateSize(size);
+});
+
 // テキストの更新
 textInput.addEventListener('input', (e) => {
-    logo.querySelector('h1').textContent = e.target.value;
-    adjustPosition();
+    if (logo.querySelector('h1')) {
+        logo.querySelector('h1').textContent = e.target.value;
+        // サイズ調整（フォントサイズのみ変更、ボックスは自動調整）
+        updateSize(currentSize);
+    }
 });
 
 // ウィンドウサイズ変更時の位置調整
@@ -159,6 +197,11 @@ function updateSettingGroupsVisibility() {
         group.style.display = isCurrentlyFullscreen ? 'none' : 'block';
     });
     
+    // 画像モードの場合はテキスト入力を非表示
+    if (isImageMode && !isCurrentlyFullscreen) {
+        textGroup.style.display = 'none';
+    }
+    
     // 設定メニュー全体の表示/非表示を切り替え
     settings.style.display = isCurrentlyFullscreen ? 'none' : 'block';
     
@@ -166,8 +209,73 @@ function updateSettingGroupsVisibility() {
     isFullscreen = isCurrentlyFullscreen;
     
     // ロゴの色を維持する
-    logo.style.backgroundColor = colors[currentColor];
+    if (!isImageMode) {
+        logo.style.backgroundColor = colors[currentColor];
+    }
     
     // 位置を調整
     adjustPosition();
-} 
+}
+
+// 画像アップロード処理
+imageUpload.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.match('image.*')) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            // テキストモードを無効化
+            isImageMode = true;
+            textGroup.style.display = 'none';
+            
+            // DVDロゴの内容を画像に置き換え
+            while (logo.firstChild) {
+                logo.removeChild(logo.firstChild);
+            }
+            
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.style.display = 'block';
+            
+            logo.appendChild(img);
+            logo.style.backgroundColor = 'transparent';
+            logo.style.padding = '0';
+            
+            // 現在のサイズを適用
+            updateSize(currentSize);
+            
+            // 位置調整
+            adjustPosition();
+        };
+        
+        reader.readAsDataURL(file);
+    }
+});
+
+// 画像削除処理
+removeImageBtn.addEventListener('click', () => {
+    // テキストモードに戻す
+    isImageMode = false;
+    textGroup.style.display = 'block';
+    
+    // DVDロゴをテキストに戻す
+    while (logo.firstChild) {
+        logo.removeChild(logo.firstChild);
+    }
+    
+    const h1 = document.createElement('h1');
+    h1.textContent = textInput.value;
+    logo.appendChild(h1);
+    
+    logo.style.backgroundColor = colors[currentColor];
+    logo.style.padding = '10px 20px';
+    
+    // 現在のサイズを適用
+    updateSize(currentSize);
+    
+    // 位置調整
+    adjustPosition();
+});
+
+// 初期化時にサイズを設定
+updateSize(currentSize); 

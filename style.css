@@ -56,6 +56,27 @@ body {
     background-color: #45a049;
 }
 
+.btn {
+    display: block;
+    width: 100%;
+    padding: 5px;
+    margin-top: 5px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: #d32f2f;
+}
+
+#remove-image {
+    display: block;
+    margin-top: 5px;
+}
+
 #dvd-logo {
     position: absolute;
     background-color: white;
@@ -67,9 +88,26 @@ body {
     font-weight: bold;
     font-size: 20px;
     text-align: center;
-    transition: background-color 0.3s;
+    transition: background-color 0.3s, width 0.3s, height 0.3s, font-size 0.3s;
     padding: 10px 20px;
     white-space: nowrap;
+    overflow: hidden;
+    height: auto;
+    box-sizing: border-box;
+}
+
+#dvd-logo h1 {
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+    width: auto;
+}
+
+#dvd-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
 }
 
 /* フルスクリーン時のDVDロゴのサイズを調整 */
@@ -77,14 +115,12 @@ body {
 :-webkit-full-screen #dvd-logo,
 :-moz-full-screen #dvd-logo,
 :-ms-fullscreen #dvd-logo {
-    padding: 20px 40px;
-    font-size: 28px;
+    padding: 20px;
 }
 
 :fullscreen #dvd-logo h1,
 :-webkit-full-screen #dvd-logo h1,
 :-moz-full-screen #dvd-logo h1,
 :-ms-fullscreen #dvd-logo h1 {
-    font-size: 28px;
     margin: 0;
 } 
