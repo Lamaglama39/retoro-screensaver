@@ -11,6 +11,9 @@ export default defineConfig({
       },
       output: {
         manualChunks: undefined,
+        entryFileNames: '[name].js',
+        chunkFileNames: '[name].js',
+        assetFileNames: '[name].[ext]'
       },
     },
     copyPublicDir: true,

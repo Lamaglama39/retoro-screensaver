@@ -346,7 +346,7 @@ function initializeWithDefaultLogo() {
     }
     
     const img = document.createElement('img');
-    img.src = 'public/dvd-logo.png';
+    img.src = '/dvd-logo.png';
     img.onerror = function() {
         // 画像が読み込めない場合はテキストモードに戻す
         isImageMode = false;
