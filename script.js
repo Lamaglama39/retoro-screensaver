@@ -6,6 +6,8 @@ const textGroup = document.getElementById('text-group');
 const imageGroup = document.getElementById('image-group');
 const imageUpload = document.getElementById('image-upload');
 const removeImageBtn = document.getElementById('remove-image');
+const applyTextBtn = document.getElementById('apply-text');
+const colorChangeToggle = document.getElementById('color-change');
 const settings = document.getElementById('settings');
 const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF'];
 let x = 0;
@@ -14,8 +16,10 @@ let dx = 2;
 let dy = 2;
 let currentColor = 0;
 let isFullscreen = false;
-let isImageMode = false;
+let isImageMode = true; // デフォルトで画像モード
 let currentSize = 5; // デフォルトサイズ
+let logoImg = null; // DVDロゴ画像要素への参照
+let changeColorOnBounce = true; // 反射時の色変更フラグ
 
 function updatePosition() {
     const maxX = window.innerWidth - logo.offsetWidth;
@@ -25,11 +29,15 @@ function updatePosition() {
     if (x + dx <= 0) {
         x = 0;
         dx = -dx;
-        changeColor();
+        if (changeColorOnBounce) {
+            changeColor();
+        }
     } else if (x + dx >= maxX) {
         x = maxX;
         dx = -dx;
-        changeColor();
+        if (changeColorOnBounce) {
+            changeColor();
+        }
     } else {
         x += dx;
     }
@@ -37,11 +45,15 @@ function updatePosition() {
     if (y + dy <= 0) {
         y = 0;
         dy = -dy;
-        changeColor();
+        if (changeColorOnBounce) {
+            changeColor();
+        }
     } else if (y + dy >= maxY) {
         y = maxY;
         dy = -dy;
-        changeColor();
+        if (changeColorOnBounce) {
+            changeColor();
+        }
     } else {
         y += dy;
     }
@@ -53,10 +65,60 @@ function updatePosition() {
 }
 
 function changeColor() {
-    if (!isImageMode) {
-        currentColor = (currentColor + 1) % colors.length;
-        logo.style.backgroundColor = colors[currentColor];
+    // 反射するたびにランダムな色に変更
+    const randomColor = getRandomColor();
+    
+    if (isImageMode && logoImg) {
+        // 画像の色を変更（フィルター効果を使用）
+        applyColorFilter(logoImg, randomColor);
+        // ボックス背景は透明に
+        logo.style.backgroundColor = 'transparent';
+    } else {
+        // テキストモードの場合は背景色を変更
+        logo.style.backgroundColor = randomColor;
     }
+}
+
+// ランダムな色を生成する関数
+function getRandomColor() {
+    return '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+}
+
+// 画像に色フィルターを適用する関数
+function applyColorFilter(img, color) {
+    // 16進カラーコードをRGB値に変換
+    const r = parseInt(color.substr(1, 2), 16);
+    const g = parseInt(color.substr(3, 2), 16);
+    const b = parseInt(color.substr(5, 2), 16);
+    
+    // 画像に色フィルターを適用
+    img.style.filter = `brightness(0) saturate(100%) invert(1) sepia(1) saturate(10000%) hue-rotate(${getHueRotate(r, g, b)}deg)`;
+}
+
+// RGB値から色相回転角度を計算
+function getHueRotate(r, g, b) {
+    // RGB値からHSL値を計算
+    r /= 255;
+    g /= 255;
+    b /= 255;
+    
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h;
+    
+    if (max === min) {
+        h = 0;
+    } else if (max === r) {
+        h = 60 * (0 + (g - b) / (max - min));
+    } else if (max === g) {
+        h = 60 * (2 + (b - r) / (max - min));
+    } else {
+        h = 60 * (4 + (r - g) / (max - min));
+    }
+    
+    if (h < 0) h += 360;
+    
+    return h;
 }
 
 function adjustPosition() {
@@ -117,8 +179,12 @@ function toggleFullscreen() {
     // 全画面切り替え後に位置を調整
     setTimeout(() => {
         adjustPosition();
-        // ロゴの色を維持する
-        logo.style.backgroundColor = colors[currentColor];
+        // 色を維持
+        if (!isImageMode) {
+            // テキストモードの場合は背景色を維持
+            const randomColor = getRandomColor();
+            logo.style.backgroundColor = randomColor;
+        }
     }, 100);
 }
 
@@ -154,12 +220,61 @@ sizeInput.addEventListener('input', (e) => {
     updateSize(size);
 });
 
-// テキストの更新
-textInput.addEventListener('input', (e) => {
-    if (logo.querySelector('h1')) {
-        logo.querySelector('h1').textContent = e.target.value;
-        // サイズ調整（フォントサイズのみ変更、ボックスは自動調整）
+// 色変更トグルの更新
+colorChangeToggle.addEventListener('change', (e) => {
+    changeColorOnBounce = e.target.checked;
+    
+    // トグルスイッチの状態ラベルを更新
+    const statusLabel = document.getElementById('color-change-status');
+    if (statusLabel) {
+        statusLabel.textContent = changeColorOnBounce ? 'オン' : 'オフ';
+    }
+});
+
+// テキスト適用ボタン
+applyTextBtn.addEventListener('click', () => {
+    if (isImageMode) {
+        // 画像モードの場合はテキストモードに切り替え
+        isImageMode = false;
+        textGroup.style.display = 'block';
+        
+        // DVDロゴをテキストに置き換え
+        while (logo.firstChild) {
+            logo.removeChild(logo.firstChild);
+        }
+        
+        const h1 = document.createElement('h1');
+        h1.textContent = textInput.value;
+        logo.appendChild(h1);
+        
+        // ロゴ画像の参照をクリア
+        logoImg = null;
+        
+        // テキストモードでは背景色を設定
+        const randomColor = getRandomColor();
+        logo.style.backgroundColor = randomColor;
+        logo.style.padding = '10px 20px';
+        
+        // 現在のサイズを適用
         updateSize(currentSize);
+        
+        // 位置調整
+        adjustPosition();
+    } else {
+        // すでにテキストモードの場合は、テキストだけ更新
+        if (logo.querySelector('h1')) {
+            logo.querySelector('h1').textContent = textInput.value;
+            // サイズ調整（フォントサイズのみ変更、ボックスは自動調整）
+            updateSize(currentSize);
+        }
+    }
+});
+
+// テキストの更新（入力中の即時反映はオフにし、ボタンクリック時のみ適用）
+textInput.addEventListener('keypress', (e) => {
+    // Enterキーでも適用
+    if (e.key === 'Enter') {
+        applyTextBtn.click();
     }
 });
 
@@ -208,13 +323,60 @@ function updateSettingGroupsVisibility() {
     // isFullscreen 状態変数を更新
     isFullscreen = isCurrentlyFullscreen;
     
-    // ロゴの色を維持する
+    // 色を維持
     if (!isImageMode) {
-        logo.style.backgroundColor = colors[currentColor];
+        // テキストモードの場合は背景色を維持
+        const randomColor = getRandomColor();
+        logo.style.backgroundColor = randomColor;
     }
     
     // 位置を調整
     adjustPosition();
+}
+
+// 初期化処理: DVDロゴを設定
+function initializeWithDefaultLogo() {
+    // テキストモードを無効化
+    isImageMode = true;
+    textGroup.style.display = 'none';
+    
+    // DVDロゴの内容を画像に置き換え
+    while (logo.firstChild) {
+        logo.removeChild(logo.firstChild);
+    }
+    
+    const img = document.createElement('img');
+    img.src = 'public/dvd-logo.png';
+    img.onerror = function() {
+        // 画像が読み込めない場合はテキストモードに戻す
+        isImageMode = false;
+        textGroup.style.display = 'block';
+        
+        const h1 = document.createElement('h1');
+        h1.textContent = textInput.value;
+        logo.appendChild(h1);
+        
+        const randomColor = getRandomColor();
+        logo.style.backgroundColor = randomColor;
+        logo.style.padding = '10px 20px';
+    };
+    img.style.display = 'block';
+    
+    // 画像要素への参照を保存
+    logoImg = img;
+    
+    logo.appendChild(img);
+    logo.style.backgroundColor = 'transparent';
+    logo.style.padding = '0';
+    
+    // 初期色をランダムに設定
+    if (changeColorOnBounce) {
+        const initialColor = getRandomColor();
+        applyColorFilter(img, initialColor);
+    }
+    
+    // 現在のサイズを適用
+    updateSize(currentSize);
 }
 
 // 画像アップロード処理
@@ -237,9 +399,18 @@ imageUpload.addEventListener('change', (e) => {
             img.src = e.target.result;
             img.style.display = 'block';
             
+            // 画像要素への参照を保存
+            logoImg = img;
+            
             logo.appendChild(img);
             logo.style.backgroundColor = 'transparent';
             logo.style.padding = '0';
+            
+            // 初期色をランダムに設定
+            if (changeColorOnBounce) {
+                const initialColor = getRandomColor();
+                applyColorFilter(img, initialColor);
+            }
             
             // 現在のサイズを適用
             updateSize(currentSize);
@@ -267,7 +438,12 @@ removeImageBtn.addEventListener('click', () => {
     h1.textContent = textInput.value;
     logo.appendChild(h1);
     
-    logo.style.backgroundColor = colors[currentColor];
+    // ロゴ画像の参照をクリア
+    logoImg = null;
+    
+    // テキストモードでは背景色を設定
+    const randomColor = getRandomColor();
+    logo.style.backgroundColor = randomColor;
     logo.style.padding = '10px 20px';
     
     // 現在のサイズを適用
@@ -299,4 +475,9 @@ document.addEventListener('contextmenu', function(e) {
     if (!settings.contains(e.target)) {
         e.preventDefault();
     }
+});
+
+// ページロード時に初期化
+document.addEventListener('DOMContentLoaded', function() {
+    initializeWithDefaultLogo();
 }); 

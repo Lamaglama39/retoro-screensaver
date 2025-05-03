@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="public/dvd-logo.png">
     <title>DVD Screensaver</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -16,9 +17,20 @@
             <label for="size">サイズ:</label>
             <input type="range" id="size" min="1" max="10" value="5">
         </div>
+        <div class="setting-group">
+            <label for="color-change">反射時の色変更:</label>
+            <div class="toggle-wrapper">
+                <div class="toggle-container">
+                    <input type="checkbox" id="color-change" checked>
+                    <label for="color-change" class="toggle-switch"></label>
+                </div>
+                <span class="toggle-label" id="color-change-status">オン</span>
+            </div>
+        </div>
         <div class="setting-group" id="text-group">
             <label for="text">表示テキスト:</label>
             <input type="text" id="text" value="DVD">
+            <button id="apply-text" class="btn btn-apply">テキストを適用</button>
         </div>
         <div class="setting-group" id="image-group">
             <label for="image-upload">画像をアップロード:</label>

@@ -33,17 +33,28 @@ body {
 }
 
 .setting-group {
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 .setting-group label {
     display: block;
     margin-bottom: 5px;
+    font-weight: bold;
 }
 
-.setting-group input {
+.setting-group input[type="range"] {
     width: 100%;
-    padding: 5px;
+    padding: 5px 0;
+}
+
+.setting-group input[type="text"],
+.setting-group input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 14px;
 }
 
 #fullscreen {
@@ -60,20 +71,87 @@ body {
     background-color: #45a049;
 }
 
+/* トグルスイッチのスタイル */
+.toggle-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.toggle-container {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+    margin-top: 5px;
+}
+
+.toggle-label {
+    margin-left: 10px;
+    font-size: 14px;
+}
+
+.toggle-container input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-switch {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    border-radius: 34px;
+    cursor: pointer;
+    transition: .4s;
+}
+
+.toggle-switch:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    border-radius: 50%;
+    transition: .4s;
+}
+
+input:checked + .toggle-switch {
+    background-color: #2196F3;
+}
+
+input:checked + .toggle-switch:before {
+    transform: translateX(26px);
+}
+
 .btn {
     display: block;
     width: 100%;
-    padding: 5px;
-    margin-top: 5px;
+    padding: 8px;
+    margin-top: 8px;
     background-color: #f44336;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
 }
 
 .btn:hover {
     background-color: #d32f2f;
+}
+
+.btn-apply {
+    background-color: #2196F3;
+}
+
+.btn-apply:hover {
+    background-color: #0b7dda;
 }
 
 #remove-image {
